@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Playtomic Feedback Survey</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #FFFFFF;
+            color: #0E2433;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1 {
+            color: #0E2433;
+        }
+        .intro, .thank-you, .confirm {
+            background-color: #0E2433;
+            color: #FFFFFF;
+            padding: 20px;
+            border-radius: 5px;
+        }
+        select, textarea {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #0E2433;
+            border-radius: 5px;
+        }
+        button {
+            background-color: #FF887A;
+            color: #FFFFFF;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        button:hover {
+            background-color: #335FFF;
+        }
+        .topic {
+            margin-bottom: 20px;
+        }
+        #surveyForm, #thankYou, #confirmPage {
+            display: none;
+        }
+        #confirmEntries {
+            background-color: #8098F8;
+            color: #0E2433;
+            padding: 20px;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="intro" class="intro">
+            <h1>Playtomic Feedback Survey</h1>
+            <p>Welcome to the Playtomic Feedback Survey!</p>
+            <select id="name">
+                <option value="">Select your name</option>
+                <option value="Alejandro">Alejandro</option>
+                <option value="Ana">Ana</option>
+                <option value="Francesca">Francesca</option>
+                <option value="Fulvio">Fulvio</option>
+                <option value="Gali">Gali</option>
+                <option value="Gil">Gil</option>
+                <option value="Jesus">Jesus</option>
+                <option value="Lisa">Lisa</option>
+                <option value="Rafa">Rafa</option>
+                <option value="Ray">Ray</option>
+            </select>
+            <button onclick="startSurvey()">Next</button>
+        </div>
+        
+        <div id="surveyForm">
+            <h1>Feedback Survey</h1>
+            <p>Dear <span id="participantName"></span>, for each topic listed below, please answer the following question:</p>
+            <p>"What are the most recurring specific questions, doubts, or problems players mention when they have a conversation around this topic?"</p>
+            <div id="topics"></div>
+            <button onclick="showConfirmPage()">Submit</button>
+        </div>
+
+        <div id="confirmPage" class="confirm">
+            <h1>Confirm Your Entries</h1>
+            <div id="confirmEntries"></div>
+            <button onclick="submitSurvey()">Confirm and Submit</button>
+            <button onclick="editSurvey()">Edit Responses</button>
+        </div>
+        
+        <div id="thankYou" class="thank-you">
+            <h1>Thank You!</h1>
+            <p>Your feedback is valuable and will help us improve our services.</p>
+            <p>Your responses have been downloaded as a CSV file.</p>
+            <button onclick="closesurvey()">Close</button>
+        </div>
+    </div>
+
+    <script>
+        const topicAssignments = {
+            "Alejandro": ["Debts", "Levels", "Open Matches"],
+            "Ana": ["Change Booking Type", "Disputes in Matches Results", "Leave Matches", "Levels test", "Not Shown"],
+            "Francesca": ["Debts", "Open Matches", "Players Profile", "Refunds"],
+            "Fulvio": ["Cancelling Out of Policy", "Change Booking Type", "Edit Results", "Payments", "Players Premium Plan", "Raising Levels", "Vouchers/Wallets", "Weather Conditions"],
+            "Gali": ["Payments", "Remove a Player", "Weather Conditions"],
+            "Gil": ["Bookings", "Matches Results"],
+            "Jesus": ["Disputes in Matches Results", "Not Shown"],
+            "Lisa": ["Players Premium Plan", "Players Profile", "Raising Levels"],
+            "Rafa": ["Cancelling Out of Policy", "Edit Results", "Leave Matches", "Levels test", "Refunds", "Vouchers/Wallets"],
+            "Ray": ["Bookings", "Levels", "Matches Results", "Remove a Player"]
+        };
+
+        let currentParticipant = '';
+
+        function startSurvey() {
+            currentParticipant = document.getElementById('name').value;
+            if (currentParticipant && topicAssignments[currentParticipant]) {
+                document.getElementById('intro').style.display = 'none';
+                document.getElementById('surveyForm').style.display = 'block';
+                document.getElementById('participantName').textContent = currentParticipant;
+                generateTopics();
+            } else {
+                alert('Please select a valid name.');
+            }
+        }
+
+        function generateTopics() {
+            const topicsDiv = document.getElementById('topics');
+            topicsDiv.innerHTML = '';
+            topicAssignments[currentParticipant].forEach(topic => {
+                topicsDiv.innerHTML += `
+                    <div class="topic">
+                        <h3>${topic}</h3>
+                        <textarea id="${topic.replace(/\s+/g, '')}" rows="4" placeholder="Your answer here..."></textarea>
+                    </div>
+                `;
+            });
+        }
+
+        function showConfirmPage() {
+            const confirmEntriesDiv = document.getElementById('confirmEntries');
+            confirmEntriesDiv.innerHTML = '<h2>Your Responses:</h2>';
+            topicAssignments[currentParticipant].forEach(topic => {
+                const response = document.getElementById(topic.replace(/\s+/g, '')).value;
+                confirmEntriesDiv.innerHTML += `
+                    <div>
+                        <h3>${topic}</h3>
+                        <p>${response || 'No response provided'}</p>
+                    </div>
+                `;
+            });
+            document.getElementById('surveyForm').style.display = 'none';
+            document.getElementById('confirmPage').style.display = 'block';
+        }
+
+        function editSurvey() {
+            document.getElementById('confirmPage').style.display = 'none';
+            document.getElementById('surveyForm').style.display = 'block';
+        }
+
+        function submitSurvey() {
+            let csvContent = "Respondent Name,Topic,Response\n";
+            topicAssignments[currentParticipant].forEach(topic => {
+                const response = document.getElementById(topic.replace(/\s+/g, '')).value.replace(/"/g, '""');
+                csvContent += `"${currentParticipant}","${topic}","${response}"\n`;
+            });
+            
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            if (link.download !== undefined) {
+                const url = URL.createObjectURL(blob);
+                link.setAttribute("href", url);
+                link.setAttribute("download", `${currentParticipant}_survey_responses.csv`);
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+            
+            document.getElementById('confirmPage').style.display = 'none';
+            document.getElementById('thankYou').style.display = 'block';
+        }
+
+        function closesurvey() {
+            window.close();
+        }
+    </script>
+</body>
+</html>
